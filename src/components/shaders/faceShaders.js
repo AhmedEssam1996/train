@@ -156,13 +156,13 @@ export const vertexShader = /* glsl */ `
     
     vec3 mvPosition = (modelViewMatrix * vec4(finalPos, 1.0)).xyz;
     
-    float baseSize = 2.2;
+    float baseSize = 2.8;
     float regionSize = 1.0;
     
-    if (aFaceRegion >= 4.0 && aFaceRegion <= 5.9) regionSize = 1.4;
-    if (isIris) regionSize = 1.8;
-    if (aFaceRegion >= 8.0 && aFaceRegion <= 9.9) regionSize = 1.2;
-    if (aFaceRegion >= 10.0) regionSize = 1.5;
+    if (aFaceRegion >= 4.0 && aFaceRegion <= 5.9) regionSize = 1.45;
+    if (isIris) regionSize = 2.1;
+    if (aFaceRegion >= 8.0 && aFaceRegion <= 9.9) regionSize = 1.25;
+    if (aFaceRegion >= 10.0) regionSize = 1.55;
     
     vSize = baseSize * regionSize;
     
@@ -173,12 +173,12 @@ export const vertexShader = /* glsl */ `
     
     gl_PointSize = vSize * (300.0 / -mvPosition.z);
     
-    vec3 idleColor = hsv2rgb(vec3(0.55, 0.5, 0.85));
-    vec3 listenColor = hsv2rgb(vec3(0.45, 0.85, 1.0));
-    vec3 thinkingColor = hsv2rgb(vec3(0.7, 0.7, 1.0));
-    vec3 speakingColor = hsv2rgb(vec3(0.12, 0.85, 1.0));
-    vec3 irisColor = hsv2rgb(vec3(0.48, 0.95, 1.0));
-    vec3 lipColor = hsv2rgb(vec3(0.95, 0.6, 0.9));
+    vec3 idleColor = hsv2rgb(vec3(0.51, 0.78, 0.98));
+    vec3 listenColor = hsv2rgb(vec3(0.49, 0.88, 1.0));
+    vec3 thinkingColor = hsv2rgb(vec3(0.53, 0.78, 1.0));
+    vec3 speakingColor = hsv2rgb(vec3(0.47, 0.88, 1.0));
+    vec3 irisColor = hsv2rgb(vec3(0.50, 1.0, 1.0));
+    vec3 lipColor = hsv2rgb(vec3(0.52, 0.72, 1.0));
     
     vec3 stateColor;
     if (uState == STATE_IDLE) stateColor = idleColor;
@@ -187,27 +187,28 @@ export const vertexShader = /* glsl */ `
     else stateColor = speakingColor;
     
     if (isIris) {
-      float irisBrightness = 1.2;
-      if (uState == STATE_LISTENING) irisBrightness = 1.8;
+      float irisBrightness = 1.35;
+      if (uState == STATE_LISTENING) irisBrightness = 2.0;
+      if (uState == STATE_SPEAKING) irisBrightness = 1.7;
       vColor = irisColor * irisBrightness;
-      vGlow = 2.5;
+      vGlow = 3.0;
     } else if (isMouth) {
-      vColor = mix(lipColor, stateColor, 0.4);
-      vGlow = uState == STATE_SPEAKING ? 1.8 : 0.8;
+      vColor = mix(lipColor, stateColor, 0.5);
+      vGlow = uState == STATE_SPEAKING ? 2.2 : 1.1;
     } else {
-      float colorMix = 0.15 + uGlowIntensity * 0.5;
-      float seedTint = (aRandomSeed - 0.5) * 0.08;
+      float colorMix = 0.18 + uGlowIntensity * 0.55;
+      float seedTint = (aRandomSeed - 0.5) * 0.05;
       vColor = mix(
-        hsv2rgb(vec3(0.55 + seedTint, 0.35 + aRandomSeed * 0.2, 0.75 + aRandomSeed * 0.15)),
+        hsv2rgb(vec3(0.51 + seedTint, 0.65 + aRandomSeed * 0.18, 0.85 + aRandomSeed * 0.12)),
         stateColor,
         colorMix
       );
-      vGlow = 0.5 + uGlowIntensity * 1.2;
+      vGlow = 0.7 + uGlowIntensity * 1.5;
     }
     
     if (uState == STATE_THINKING) {
-      vColor = mix(vColor, hsv2rgb(vec3(0.65 + sin(uTime + aRandomSeed * 10.0) * 0.1, 0.8, 1.0)), 0.5);
-      vGlow = 1.2;
+      vColor = mix(vColor, hsv2rgb(vec3(0.52 + sin(uTime + aRandomSeed * 10.0) * 0.06, 0.82, 1.0)), 0.55);
+      vGlow = 1.5;
     }
     
     vDepth = -mvPosition.z;
@@ -236,23 +237,23 @@ export const fragmentShader = /* glsl */ `
     
     if (dist > 0.5) discard;
     
-    float softness = 1.0 - smoothstep(0.3, 0.5, dist);
-    float core = 1.0 - smoothstep(0.0, 0.25, dist);
+    float softness = 1.0 - smoothstep(0.25, 0.5, dist);
+    float core = 1.0 - smoothstep(0.0, 0.22, dist);
     
     vec3 color = vColor;
     
-    float glowAmount = vGlow * (0.8 + uGlowIntensity * 0.6);
+    float glowAmount = vGlow * (0.9 + uGlowIntensity * 0.7);
     
     vec3 finalColor = color;
-    float finalAlpha = softness * 0.92;
+    float finalAlpha = softness * 0.94;
     
-    float coreBrightness = 1.0 + core * glowAmount * 0.8;
+    float coreBrightness = 1.0 + core * glowAmount * 1.0;
     finalColor *= coreBrightness;
     
-    finalColor += color * softness * glowAmount * 0.5;
+    finalColor += color * softness * glowAmount * 0.65;
     
     float depthFade = smoothstep(2.0, 8.0, vDepth);
-    depthFade = mix(0.4, 1.0, depthFade);
+    depthFade = mix(0.45, 1.0, depthFade);
     finalAlpha *= depthFade;
     
     if (uIntroProgress < 1.0) {
@@ -262,7 +263,7 @@ export const fragmentShader = /* glsl */ `
     
     if (uState == STATE_THINKING) {
       float swirl = sin(atan(center.y, center.x) * 8.0 + uTime * 10.0 + vRandomSeed * 15.0) * 0.5 + 0.5;
-      finalAlpha *= 0.7 + swirl * 0.3;
+      finalAlpha *= 0.72 + swirl * 0.28;
     }
     
     gl_FragColor = vec4(finalColor, finalAlpha);

@@ -3,7 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { vertexShader, fragmentShader } from './shaders/faceShaders';
 
-const PARTICLE_COUNT = 25000;
+const PARTICLE_COUNT = 26000;
 
 function seededRandom(seed) {
   const x = Math.sin(seed) * 10000;
@@ -139,14 +139,14 @@ function generateHeadGeometry() {
         z = eyeCenterZ + (r3 - 0.5) * 0.04;
         
         const irisDist = eyeR;
-        if (irisDist < 0.06 && r4 < 0.35) {
+        if (irisDist < 0.07 && r4 < 0.45) {
           const irisAngle = seededRandom(seed * 7) * Math.PI * 2;
-          const irisR = seededRandom(seed * 11) * 0.055;
+          const irisR = seededRandom(seed * 11) * 0.062;
           x = eyeCenterX + Math.cos(irisAngle) * irisR;
           y = eyeCenterY + Math.sin(irisAngle) * irisR * 0.95;
           z = eyeCenterZ + 0.02 + r3 * 0.01;
           particleTypes[i] = 2;
-        } else if (irisDist < 0.025 && r4 < 0.6) {
+        } else if (irisDist < 0.03 && r4 < 0.7) {
           particleTypes[i] = 2.1;
           z = eyeCenterZ + 0.025;
         }
@@ -304,7 +304,7 @@ export default function ParticleFace({
     const time = state.clock.getElapsedTime();
 
     if (introRef.current < 1.0) {
-      introRef.current = Math.min(1.0, introRef.current + delta / 2.0);
+      introRef.current = Math.min(1.0, introRef.current + delta / 1.6);
       if (introRef.current >= 1.0 && !introCompleteRef.current) {
         introCompleteRef.current = true;
       }

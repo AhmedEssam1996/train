@@ -311,6 +311,17 @@ class BilingualSpeechService {
     }
   }
 
+  setOnTtsAudioData(callback) {
+    this.onTtsAudioData = callback;
+  }
+
+  setRecognitionLanguage(lang) {
+    this.currentLanguage = lang;
+    if (this.recognition) {
+      this.recognition.lang = lang;
+    }
+  }
+
   getCurrentLanguage() {
     return this.currentLanguage;
   }
@@ -327,10 +338,6 @@ class BilingualSpeechService {
   getEnglishVoice() {
     this.initVoices();
     return this.selectedEnglishVoice;
-  }
-
-  setOnTtsAudioData(callback) {
-    this.onTtsAudioData = callback;
   }
 }
 
