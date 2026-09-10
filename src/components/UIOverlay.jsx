@@ -9,15 +9,15 @@ function ToggleSwitch({ enabled, onChange }) {
         height: '18px',
         borderRadius: '10px',
         background: enabled
-          ? 'linear-gradient(135deg, #00e5ff, #00b8d4)'
-          : 'rgba(80, 100, 130, 0.4)',
+          ? 'linear-gradient(135deg, #00e5ff, #0097a7)'
+          : 'rgba(55, 80, 110, 0.5)',
         position: 'relative',
         cursor: 'pointer',
         transition: 'all 0.25s ease',
-        boxShadow: enabled ? '0 0 12px rgba(0, 229, 255, 0.3)' : 'none',
+        boxShadow: enabled ? '0 0 10px rgba(0, 229, 255, 0.25)' : 'none',
         border: enabled
-          ? '1px solid rgba(0, 229, 255, 0.4)'
-          : '1px solid rgba(100, 120, 150, 0.25)',
+          ? '1px solid rgba(0, 229, 255, 0.5)'
+          : '1px solid rgba(90, 120, 160, 0.3)',
         flexShrink: 0,
       }}
     >
@@ -30,7 +30,7 @@ function ToggleSwitch({ enabled, onChange }) {
         borderRadius: '50%',
         background: enabled ? '#ffffff' : '#a0b4c8',
         transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.4)',
       }} />
     </div>
   );
@@ -46,10 +46,10 @@ function MiniAudioWave({ curState }) {
       const bars = 32;
       const arr = [];
       for (let i = 0; i < bars; i++) {
-        const base = curState === 'IDLE' ? 8 : 15;
-        const noise = Math.abs(Math.sin(Date.now() / 200 + i * 0.5));
-        const amp = curState === 'SPEAKING' ? 0.9 : curState === 'LISTENING' ? 0.7 : curState === 'THINKING' ? 0.5 : 0.25;
-        arr.push(base + noise * 18 * amp);
+        const base = curState === 'IDLE' ? 6 : 12;
+        const noise = Math.abs(Math.sin(Date.now() / 180 + i * 0.45));
+        const amp = curState === 'SPEAKING' ? 0.9 : curState === 'LISTENING' ? 0.7 : curState === 'THINKING' ? 0.5 : 0.22;
+        arr.push(base + noise * 16 * amp);
       }
       barsRef.current = arr;
       forceRender((x) => x + 1);
@@ -61,26 +61,27 @@ function MiniAudioWave({ curState }) {
     };
   }, [curState]);
 
-  const bars = barsRef.current.length > 0 ? barsRef.current : Array(32).fill(10);
+  const bars = barsRef.current.length > 0 ? barsRef.current : Array(32).fill(8);
 
   return (
     <div style={{
       width: '100%',
-      height: '36px',
+      height: '32px',
       display: 'flex',
-      alignItems: 'flex-end',
+      alignItems: 'center',
       justifyContent: 'space-between',
       gap: '1.5px',
-      padding: '4px 0',
+      padding: '2px 0',
     }}>
       {bars.map((h, i) => (
         <div key={i} style={{
           width: '3px',
           height: `${h}px`,
-          minHeight: '3px',
-          borderRadius: '2px',
-          background: 'linear-gradient(to top, #0088aa, #00e5ff)',
-          boxShadow: curState !== 'IDLE' ? '0 0 4px rgba(0, 229, 255, 0.4)' : 'none',
+          minHeight: '2px',
+          borderRadius: '1.5px',
+          background: `linear-gradient(to top, #007a8c, #00e5ff)`,
+          boxShadow: curState !== 'IDLE' ? '0 0 3px rgba(0, 229, 255, 0.35)' : 'none',
+          opacity: curState === 'IDLE' ? 0.55 : 0.9,
           transition: 'height 0.08s linear',
         }} />
       ))}
@@ -93,10 +94,10 @@ function PanelBox({ children, extraStyle }) {
     <div style={{
       padding: '14px 16px',
       borderRadius: '10px',
-      background: 'linear-gradient(145deg, rgba(12, 22, 42, 0.75), rgba(8, 16, 32, 0.85))',
-      border: '1px solid rgba(0, 229, 255, 0.12)',
-      backdropFilter: 'blur(12px)',
-      boxShadow: '0 4px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.03)',
+      background: 'linear-gradient(145deg, rgba(10, 22, 44, 0.72), rgba(6, 14, 30, 0.82))',
+      border: '1px solid rgba(0, 180, 230, 0.15)',
+      backdropFilter: 'blur(14px)',
+      boxShadow: '0 4px 28px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.03)',
       ...(extraStyle || {}),
     }}>
       {children}
@@ -107,10 +108,10 @@ function PanelBox({ children, extraStyle }) {
 function SectionTitle({ children }) {
   return (
     <h3 style={{
-      fontSize: '10.5px',
-      fontWeight: 700,
+      fontSize: '10px',
+      fontWeight: 800,
       letterSpacing: '1.8px',
-      color: 'rgba(150, 190, 230, 0.8)',
+      color: 'rgba(160, 200, 240, 0.9)',
       marginBottom: '10px',
       fontFamily: '"Inter", "Segoe UI", Arial, sans-serif',
       textTransform: 'uppercase',
@@ -141,13 +142,13 @@ export default function UIOverlay(props) {
   const stateInfo = useMemo(() => {
     switch (state) {
       case 'LISTENING':
-        return { label: 'LISTENING', color: '#00ffc8', colorBg: 'rgba(0, 255, 200, 0.12)', colorBorder: 'rgba(0, 255, 200, 0.5)', textColor: '#00ffc8' };
+        return { label: 'LISTENING', color: '#00e5ff', colorBg: 'rgba(0, 229, 255, 0.18)', colorBorder: 'rgba(0, 229, 255, 0.55)', textColor: '#00e5ff' };
       case 'THINKING':
-        return { label: 'THINKING', color: '#b478ff', colorBg: 'rgba(180, 120, 255, 0.12)', colorBorder: 'rgba(180, 120, 255, 0.5)', textColor: '#b478ff' };
+        return { label: 'THINKING', color: '#5eb8ff', colorBg: 'rgba(94, 184, 255, 0.15)', colorBorder: 'rgba(94, 184, 255, 0.5)', textColor: '#7ec8ff' };
       case 'SPEAKING':
-        return { label: 'SPEAKING', color: '#ffc850', colorBg: 'rgba(255, 200, 80, 0.12)', colorBorder: 'rgba(255, 200, 80, 0.5)', textColor: '#ffc850' };
+        return { label: 'SPEAKING', color: '#4fc3f7', colorBg: 'rgba(79, 195, 247, 0.15)', colorBorder: 'rgba(79, 195, 247, 0.5)', textColor: '#6fd0f8' };
       default:
-        return { label: 'IDLE', color: '#64a0dc', colorBg: 'rgba(100, 160, 220, 0.12)', colorBorder: 'rgba(100, 160, 220, 0.4)', textColor: '#9ec5ff' };
+        return { label: 'IDLE', color: '#4fc3f7', colorBg: 'rgba(0, 200, 240, 0.18)', colorBorder: 'rgba(0, 200, 240, 0.55)', textColor: '#00e5ff' };
     }
   }, [state]);
 
@@ -169,59 +170,57 @@ export default function UIOverlay(props) {
         top: 0,
         left: 0,
         right: 0,
-        height: '64px',
-        background: 'linear-gradient(180deg, rgba(5, 12, 26, 0.9) 0%, rgba(5, 12, 26, 0.65) 60%, transparent 100%)',
+        height: '72px',
+        background: 'linear-gradient(180deg, rgba(6, 16, 34, 0.95) 0%, rgba(6, 16, 34, 0.7) 65%, transparent 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 40px',
+        padding: '0 48px',
         pointerEvents: 'auto',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-          <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+          <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
             <defs>
               <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#00e5ff" />
                 <stop offset="50%" stopColor="#40c4ff" />
-                <stop offset="100%" stopColor="#b478ff" />
+                <stop offset="100%" stopColor="#80deea" />
               </linearGradient>
             </defs>
             <g transform="translate(20,20)">
-              {Array.from({ length: 12 }, (_, i) => {
-                const angle = (i / 12) * Math.PI * 2;
-                const r1 = 6 + (i % 3) * 2;
+              {Array.from({ length: 14 }, (_, i) => {
+                const angle = (i / 14) * Math.PI * 2;
+                const r1 = 5 + (i % 4) * 2.2;
                 const x = Math.cos(angle) * r1;
                 const y = Math.sin(angle) * r1;
-                return <circle key={i} cx={x} cy={y} r={1.8} fill="url(#logoGrad)" opacity={0.8 + (i % 3) * 0.1} />;
+                return <circle key={i} cx={x} cy={y} r={1.5} fill="url(#logoGrad)" opacity={0.75 + (i % 3) * 0.08} />;
               })}
-              <circle r="3" fill="url(#logoGrad)" />
+              <circle r="2.8" fill="url(#logoGrad)" />
             </g>
           </svg>
           <span style={{
             fontSize: '20px',
             fontWeight: 800,
-            letterSpacing: '1.5px',
+            letterSpacing: '1px',
             color: '#ffffff',
           }}>
-            AVATARI<span style={{ color: '#00e5ff', marginLeft: '2px' }}>.IO</span>
+            AVATARI<span style={{ color: '#ffffff', marginLeft: '1px', opacity: 0.95 }}>.IO</span>
           </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '36px' }}>
-          {navLinks.map((link, idx) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '38px' }}>
+          {navLinks.map((link) => (
             <a key={link} href="#" style={{
               fontSize: '12px',
               fontWeight: 600,
-              letterSpacing: '1.5px',
-              color: idx === 0 ? '#ffffff' : 'rgba(200, 220, 240, 0.75)',
+              letterSpacing: '1.2px',
+              color: 'rgba(255, 255, 255, 0.92)',
               textDecoration: 'none',
               transition: 'color 0.2s ease',
               cursor: 'pointer',
-              borderBottom: idx === 0 ? '2px solid #00e5ff' : '2px solid transparent',
-              paddingBottom: '4px',
             }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = '#ffffff'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = idx === 0 ? '#ffffff' : 'rgba(200, 220, 240, 0.75)'; }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = '#00e5ff'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255, 255, 255, 0.92)'; }}
             >
               {link}
             </a>
@@ -247,35 +246,35 @@ export default function UIOverlay(props) {
           <button onClick={onToggleMusic} style={{
             padding: '8px 12px',
             fontSize: '15px',
-            background: musicEnabled ? 'rgba(0, 229, 255, 0.1)' : 'rgba(100, 120, 140, 0.08)',
-            border: `1px solid ${musicEnabled ? 'rgba(0, 229, 255, 0.3)' : 'rgba(140, 160, 180, 0.15)'}`,
+            background: musicEnabled ? 'rgba(0, 229, 255, 0.08)' : 'rgba(100, 120, 140, 0.06)',
+            border: `1px solid ${musicEnabled ? 'rgba(0, 229, 255, 0.25)' : 'rgba(140, 160, 180, 0.15)'}`,
             borderRadius: '8px',
             cursor: 'pointer',
           }} title={musicEnabled ? 'Music: ON' : 'Music: OFF'}>
             {musicEnabled ? '🎵' : '🔇'}
           </button>
           <button style={{
-            padding: '10px 22px',
+            padding: '10px 24px',
             fontSize: '12px',
             fontWeight: 700,
-            letterSpacing: '1px',
-            color: '#1a0a00',
-            background: 'linear-gradient(135deg, #ff8c42 0%, #ff6a1f 100%)',
+            letterSpacing: '0.8px',
+            color: '#ffffff',
+            background: 'linear-gradient(135deg, #ff8a50 0%, #f26223 100%)',
             border: 'none',
             borderRadius: '6px',
             cursor: 'pointer',
             fontFamily: 'inherit',
-            boxShadow: '0 4px 20px rgba(255, 120, 50, 0.35)',
+            boxShadow: '0 4px 20px rgba(242, 98, 35, 0.4)',
             transition: 'all 0.25s ease',
             outline: 'none',
           }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.boxShadow = '0 6px 28px rgba(255, 120, 50, 0.5)';
+              e.currentTarget.style.boxShadow = '0 6px 28px rgba(242, 98, 35, 0.55)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 20px rgba(255, 120, 50, 0.35)';
+              e.currentTarget.style.boxShadow = '0 4px 20px rgba(242, 98, 35, 0.4)';
             }}
           >
             GET STARTED
@@ -283,15 +282,56 @@ export default function UIOverlay(props) {
         </div>
       </div>
 
+      {/* ===== HERO TITLE ===== */}
+      <div style={{
+        position: 'absolute',
+        top: '96px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        textAlign: 'center',
+        width: '100%',
+        maxWidth: '900px',
+        padding: '0 40px',
+        pointerEvents: 'none',
+      }}>
+        <h1 style={{
+          margin: '0 0 12px',
+          fontSize: 'clamp(30px, 3.8vw, 46px)',
+          fontWeight: 900,
+          letterSpacing: '-0.5px',
+          lineHeight: 1.1,
+          color: '#ffffff',
+          textTransform: 'uppercase',
+          textShadow: '0 2px 40px rgba(0, 180, 230, 0.15)',
+        }}>
+          YOUR REAL-TIME PARTICLE
+          <br />
+          AVATAR — NO GLB REQUIRED
+        </h1>
+        <p style={{
+          margin: '0 auto',
+          maxWidth: '620px',
+          fontSize: 'clamp(13px, 1.2vw, 15px)',
+          fontWeight: 400,
+          lineHeight: 1.6,
+          color: 'rgba(170, 200, 230, 0.82)',
+          letterSpacing: '0.2px',
+        }}>
+          Build High-Quality, Dynamic 3D Avatars Procedurally using Three.js,
+          <br />
+          React Three Fiber, ShaderMaterial, and Web Audio API.
+        </p>
+      </div>
+
       {/* ===== LEFT PANEL ===== */}
       <div style={{
         position: 'absolute',
-        left: '40px',
-        top: '120px',
+        left: '48px',
+        top: '220px',
         display: 'flex',
         flexDirection: 'column',
         gap: '14px',
-        width: '200px',
+        width: '205px',
         pointerEvents: 'auto',
       }}>
         <PanelBox>
@@ -304,15 +344,15 @@ export default function UIOverlay(props) {
                   padding: '7px 8px',
                   fontSize: '9.5px',
                   fontWeight: 700,
-                  letterSpacing: '0.8px',
+                  letterSpacing: '0.6px',
                   borderRadius: '6px',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
                   fontFamily: 'inherit',
-                  border: isActive ? `1px solid ${stateInfo.colorBorder}` : '1px solid rgba(100, 130, 170, 0.2)',
-                  background: isActive ? stateInfo.colorBg : 'rgba(30, 48, 78, 0.3)',
-                  color: isActive ? stateInfo.textColor : 'rgba(170, 195, 225, 0.7)',
-                  boxShadow: isActive ? `0 0 12px ${stateInfo.color}25` : 'none',
+                  border: isActive ? `1px solid ${stateInfo.colorBorder}` : '1px solid rgba(80, 110, 150, 0.2)',
+                  background: isActive ? stateInfo.colorBg : 'rgba(20, 35, 60, 0.3)',
+                  color: isActive ? stateInfo.textColor : 'rgba(160, 190, 225, 0.75)',
+                  boxShadow: isActive ? `0 0 10px ${stateInfo.color}22` : 'none',
                   outline: 'none',
                 }}>
                   {statusBtn}
@@ -326,31 +366,31 @@ export default function UIOverlay(props) {
           <SectionTitle>PERFORMANCE</SectionTitle>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <div style={{
-              padding: '8px 12px', borderRadius: '8px',
-              background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.1), rgba(0, 180, 212, 0.05))',
-              border: '1px solid rgba(0, 229, 255, 0.2)',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+              padding: '9px 14px', borderRadius: '8px',
+              background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.12), rgba(0, 180, 212, 0.06))',
+              border: '1px solid rgba(0, 229, 255, 0.22)',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             }}>
-              <span style={{ fontSize: '11px', fontWeight: 500, color: 'rgba(150, 190, 230, 0.7)', letterSpacing: '0.5px' }}>FPS</span>
+              <span style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(150, 190, 230, 0.72)', letterSpacing: '0.5px' }}>60 FPS</span>
               <span style={{
-                fontSize: '18px', fontWeight: 800,
-                color: fps >= 50 ? '#00ffc8' : fps >= 30 ? '#ffc850' : '#ff7070',
+                fontSize: '16px', fontWeight: 800,
+                color: fps >= 50 ? '#00e5ff' : fps >= 30 ? '#ffc850' : '#ff7070',
                 fontFamily: '"Consolas", monospace',
-                textShadow: fps >= 50 ? '0 0 10px rgba(0, 255, 200, 0.4)' : 'none',
+                textShadow: fps >= 50 ? '0 0 8px rgba(0, 229, 255, 0.35)' : 'none',
               }}>{fps}</span>
             </div>
             <div style={{
-              padding: '8px 12px', borderRadius: '8px',
-              background: 'linear-gradient(135deg, rgba(180, 120, 255, 0.08), rgba(120, 80, 220, 0.04))',
-              border: '1px solid rgba(180, 120, 255, 0.2)',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+              padding: '9px 14px', borderRadius: '8px',
+              background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.12), rgba(0, 180, 212, 0.06))',
+              border: '1px solid rgba(0, 229, 255, 0.22)',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             }}>
-              <span style={{ fontSize: '11px', fontWeight: 500, color: 'rgba(150, 190, 230, 0.7)', letterSpacing: '0.5px' }}>PARTICLES</span>
+              <span style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(150, 190, 230, 0.72)', letterSpacing: '0.5px' }}>25K PARTICLES</span>
               <span style={{
-                fontSize: '18px', fontWeight: 800, color: '#b478ff',
+                fontSize: '16px', fontWeight: 800, color: '#00e5ff',
                 fontFamily: '"Consolas", monospace',
-                textShadow: '0 0 10px rgba(180, 120, 255, 0.35)',
-              }}>{(particleCount / 1000).toFixed(0)}K</span>
+                textShadow: '0 0 8px rgba(0, 229, 255, 0.35)',
+              }}>{Math.round(particleCount / 1000)}K</span>
             </div>
           </div>
         </PanelBox>
@@ -359,12 +399,12 @@ export default function UIOverlay(props) {
       {/* ===== RIGHT PANEL ===== */}
       <div style={{
         position: 'absolute',
-        right: '40px',
-        top: '120px',
+        right: '48px',
+        top: '220px',
         display: 'flex',
         flexDirection: 'column',
         gap: '14px',
-        width: '220px',
+        width: '225px',
         pointerEvents: 'auto',
       }}>
         <PanelBox>
@@ -376,14 +416,14 @@ export default function UIOverlay(props) {
                 const active = (on && lipSyncEnabled) || (!on && !lipSyncEnabled);
                 return (
                   <button key={opt} onClick={onToggleLipSync} style={{
-                    padding: '5px 14px',
-                    fontSize: '10px', fontWeight: 700, letterSpacing: '1px',
+                    padding: '5px 15px',
+                    fontSize: '10px', fontWeight: 700, letterSpacing: '0.8px',
                     borderRadius: '5px', cursor: 'pointer', fontFamily: 'inherit',
                     transition: 'all 0.2s ease',
-                    border: active ? '1px solid rgba(0, 229, 255, 0.5)' : '1px solid rgba(100, 130, 170, 0.2)',
-                    background: active ? 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(0, 180, 212, 0.1))' : 'rgba(30, 48, 78, 0.25)',
-                    color: active ? '#00e5ff' : 'rgba(160, 185, 215, 0.6)',
-                    boxShadow: active ? '0 0 10px rgba(0, 229, 255, 0.2)' : 'none',
+                    border: active ? '1px solid rgba(0, 229, 255, 0.55)' : '1px solid rgba(80, 110, 150, 0.2)',
+                    background: active ? 'linear-gradient(135deg, rgba(0, 229, 255, 0.22), rgba(0, 180, 212, 0.12))' : 'rgba(20, 35, 60, 0.25)',
+                    color: active ? '#00e5ff' : 'rgba(150, 180, 215, 0.6)',
+                    boxShadow: active ? '0 0 10px rgba(0, 229, 255, 0.18)' : 'none',
                     outline: 'none',
                   }}>
                     {opt}
@@ -394,11 +434,14 @@ export default function UIOverlay(props) {
             <ToggleSwitch enabled={lipSyncEnabled} onChange={onToggleLipSync} />
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.6px', color: micInputEnabled ? 'rgba(0, 229, 255, 0.85)' : 'rgba(140, 160, 180, 0.5)' }}>
-              Mic Input · Audio Waveform:
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+            <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.3px', color: micInputEnabled ? 'rgba(160, 200, 240, 0.88)' : 'rgba(130, 150, 180, 0.55)' }}>
+              Mic Input
             </span>
             <ToggleSwitch enabled={micInputEnabled} onChange={onToggleMic} />
+          </div>
+          <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.3px', color: micInputEnabled ? 'rgba(160, 200, 240, 0.88)' : 'rgba(130, 150, 180, 0.55)', marginBottom: '4px' }}>
+            Audio Waveform:
           </div>
           <MiniAudioWave curState={state} />
         </PanelBox>
@@ -406,25 +449,18 @@ export default function UIOverlay(props) {
         <PanelBox>
           <SectionTitle>FEATURES</SectionTitle>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-            {['BufferGeometry', 'ShaderMaterial', 'Audio API'].map((feat, i) => {
-              const colors = ['#00e5ff', '#b478ff', '#ffc850'];
-              return (
-                <div key={feat} style={{
-                  display: 'flex', alignItems: 'center', gap: '10px',
-                  padding: '6px 10px', borderRadius: '6px',
-                  background: 'rgba(20, 35, 60, 0.25)',
-                  borderLeft: `2px solid ${colors[i]}55`,
-                }}>
-                  <div style={{
-                    width: '6px', height: '6px', borderRadius: '50%', background: colors[i],
-                    boxShadow: `0 0 8px ${colors[i]}99`,
-                  }} />
-                  <span style={{ fontSize: '11px', fontWeight: 500, color: 'rgba(200, 220, 240, 0.85)', letterSpacing: '0.3px' }}>
-                    {feat}
-                  </span>
-                </div>
-              );
-            })}
+            {['BufferGeometry', 'ShaderMaterial', 'Audio API'].map((feat) => (
+              <div key={feat} style={{
+                display: 'flex', alignItems: 'center',
+                padding: '7px 12px', borderRadius: '6px',
+                background: 'rgba(15, 30, 55, 0.35)',
+                border: '1px solid rgba(0, 229, 255, 0.08)',
+              }}>
+                <span style={{ fontSize: '11px', fontWeight: 500, color: 'rgba(200, 225, 250, 0.9)', letterSpacing: '0.2px' }}>
+                  {feat}
+                </span>
+              </div>
+            ))}
           </div>
         </PanelBox>
 
@@ -432,21 +468,21 @@ export default function UIOverlay(props) {
           <SectionTitle>STATES</SectionTitle>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {[
-              { name: 'Breathe', val: autoStates.breathe ? '[active]' : '[off]', active: autoStates.breathe, color: '#00ffc8' },
-              { name: 'Blink', val: `[${autoStates.blink}]`, active: autoStates.blink === 'auto', color: '#40c4ff' },
-              { name: 'Gaze', val: `[${autoStates.gaze}]`, active: autoStates.gaze === 'auto', color: '#b478ff' },
+              { name: 'Breathe', val: autoStates.breathe ? '[active]' : '[off]', active: autoStates.breathe, color: '#00e5ff' },
+              { name: 'Blink', val: `[${autoStates.blink}]`, active: autoStates.blink === 'auto', color: '#00e5ff' },
+              { name: 'Gaze', val: `[${autoStates.gaze}]`, active: autoStates.gaze === 'auto', color: '#00e5ff' },
             ].map((st) => (
               <div key={st.name} style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '5px 10px', borderRadius: '6px',
-                background: st.active ? `${st.color}12` : 'transparent',
+                padding: '5px 12px', borderRadius: '6px',
+                background: st.active ? `${st.color}10` : 'transparent',
               }}>
-                <span style={{ fontSize: '11px', fontWeight: 500, color: 'rgba(200, 220, 240, 0.85)', letterSpacing: '0.5px' }}>
+                <span style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(200, 225, 250, 0.9)', letterSpacing: '0.4px' }}>
                   {st.name}
                 </span>
                 <span style={{
-                  fontSize: '10px', fontWeight: 700, letterSpacing: '0.5px',
-                  color: st.active ? st.color : 'rgba(130, 150, 170, 0.5)',
+                  fontSize: '10px', fontWeight: 800, letterSpacing: '0.4px',
+                  color: st.active ? st.color : 'rgba(120, 145, 175, 0.55)',
                   fontFamily: '"Consolas", monospace',
                 }}>
                   {st.val}
@@ -461,7 +497,7 @@ export default function UIOverlay(props) {
       {transcript && (
         <div style={{
           position: 'absolute',
-          top: '100px',
+          top: '120px',
           left: '50%',
           transform: 'translateX(-50%)',
           maxWidth: '50%',
@@ -472,6 +508,7 @@ export default function UIOverlay(props) {
           border: `1px solid ${stateInfo.colorBorder}`,
           boxShadow: `0 0 30px ${stateInfo.color}22`,
           pointerEvents: 'none',
+          marginTop: '140px',
         }}>
           <p style={{
             margin: 0, fontSize: 'clamp(12px, 1.15vw, 15px)',
@@ -488,11 +525,11 @@ export default function UIOverlay(props) {
       <div style={{
         position: 'absolute',
         left: '50%',
-        bottom: '200px',
+        bottom: '120px',
         transform: 'translateX(-50%)',
         display: 'flex',
         gap: '18px',
-        width: 'min(90%, 960px)',
+        width: 'min(92%, 1020px)',
         pointerEvents: 'auto',
       }}>
         <FeatureCard
@@ -501,8 +538,8 @@ export default function UIOverlay(props) {
         >
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <Tag color="#00e5ff">BufferGeometry</Tag>
-            <span style={{ color: 'rgba(150, 170, 200, 0.5)', fontSize: '12px' }}>&</span>
-            <Tag color="#b478ff">
+            <span style={{ color: 'rgba(140, 170, 200, 0.55)', fontSize: '12px' }}>&</span>
+            <Tag color="#00e5ff">
               BufferGeometry
               <br />&amp; shaders
             </Tag>
@@ -513,12 +550,12 @@ export default function UIOverlay(props) {
           title="REAL-TIME MOUTH ANIMATION"
           subtitle="Audio analysis to displacement flow"
         >
-          <svg width="100%" height="22" viewBox="0 0 120 22">
+          <svg width="100%" height="24" viewBox="0 0 120 24">
             {Array.from({ length: 20 }, (_, i) => {
               const x = i * 6 + 2;
-              const h = 4 + Math.abs(Math.sin(i * 0.9)) * 14;
-              return <rect key={i} x={x} y={11 - h / 2} width="3" height={h} rx="1.5"
-                fill={state !== 'IDLE' ? '#ffc850' : '#64a0dc'} opacity="0.8" />;
+              const h = 3 + Math.abs(Math.sin(i * 0.9 + (state !== 'IDLE' ? Date.now() / 400 : 0))) * 16;
+              return <rect key={i} x={x} y={12 - h / 2} width="3" height={h} rx="1.5"
+                fill={state !== 'IDLE' ? '#4fc3f7' : '#54799e'} opacity={state !== 'IDLE' ? 0.9 : 0.5} />;
             })}
           </svg>
         </FeatureCard>
@@ -528,28 +565,28 @@ export default function UIOverlay(props) {
           subtitle="GPU optimized maciel performance"
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-            <svg width="38" height="28" viewBox="0 0 38 28" fill="none">
-              <circle cx="8" cy="14" r="6" stroke="#40c4ff" strokeWidth="1.5" opacity="0.8" />
-              <circle cx="19" cy="8" r="4" stroke="#00e5ff" strokeWidth="1.5" opacity="0.7" />
-              <circle cx="19" cy="20" r="4" stroke="#00e5ff" strokeWidth="1.5" opacity="0.7" />
-              <circle cx="30" cy="14" r="6" stroke="#b478ff" strokeWidth="1.5" opacity="0.8" />
-              <line x1="13" y1="12" x2="16" y2="10" stroke="#64a0dc" strokeWidth="1" />
-              <line x1="13" y1="16" x2="16" y2="18" stroke="#64a0dc" strokeWidth="1" />
-              <line x1="22" y1="10" x2="25" y2="12" stroke="#64a0dc" strokeWidth="1" />
-              <line x1="22" y1="18" x2="25" y2="16" stroke="#64a0dc" strokeWidth="1" />
+            <svg width="40" height="28" viewBox="0 0 40 28" fill="none">
+              <circle cx="8" cy="14" r="6" stroke="#4fc3f7" strokeWidth="1.5" opacity="0.75" />
+              <circle cx="19" cy="8" r="4" stroke="#00e5ff" strokeWidth="1.5" opacity="0.65" />
+              <circle cx="19" cy="20" r="4" stroke="#00e5ff" strokeWidth="1.5" opacity="0.65" />
+              <circle cx="31" cy="14" r="6" stroke="#4fc3f7" strokeWidth="1.5" opacity="0.75" />
+              <line x1="13" y1="12" x2="16" y2="10" stroke="#54799e" strokeWidth="1" />
+              <line x1="13" y1="16" x2="16" y2="18" stroke="#54799e" strokeWidth="1" />
+              <line x1="22" y1="10" x2="26" y2="12" stroke="#54799e" strokeWidth="1" />
+              <line x1="22" y1="18" x2="26" y2="16" stroke="#54799e" strokeWidth="1" />
             </svg>
             <span style={{
-              fontSize: '20px', fontWeight: 900, margin: '0 4px',
-              background: 'linear-gradient(90deg, #00e5ff, #40c4ff)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+              fontSize: '20px', fontWeight: 900, margin: '0 6px',
+              color: '#00e5ff',
+              opacity: 0.8,
             }}>→</span>
-            <svg width="44" height="28" viewBox="0 0 44 28" fill="none">
-              <rect x="6" y="4" width="32" height="20" rx="3" stroke="#00e5ff" strokeWidth="1.5" opacity="0.7" />
-              <rect x="11" y="8" width="8" height="5" rx="1" fill="#00e5ff" opacity="0.3" />
-              <rect x="21" y="8" width="8" height="5" rx="1" fill="#b478ff" opacity="0.3" />
-              <rect x="11" y="15" width="22" height="6" rx="1" fill="#40c4ff" opacity="0.2" />
-              <line x1="0" y1="14" x2="6" y2="14" stroke="#64a0dc" strokeWidth="1.5" />
-              <line x1="38" y1="14" x2="44" y2="14" stroke="#64a0dc" strokeWidth="1.5" />
+            <svg width="46" height="28" viewBox="0 0 46 28" fill="none">
+              <rect x="7" y="4" width="32" height="20" rx="3" stroke="#4fc3f7" strokeWidth="1.5" opacity="0.65" />
+              <rect x="12" y="8" width="8" height="5" rx="1" fill="#4fc3f7" opacity="0.25" />
+              <rect x="22" y="8" width="8" height="5" rx="1" fill="#00e5ff" opacity="0.2" />
+              <rect x="12" y="15" width="22" height="6" rx="1" fill="#00e5ff" opacity="0.15" />
+              <line x1="0" y1="14" x2="7" y2="14" stroke="#54799e" strokeWidth="1.5" />
+              <line x1="39" y1="14" x2="46" y2="14" stroke="#54799e" strokeWidth="1.5" />
             </svg>
           </div>
         </FeatureCard>
@@ -559,41 +596,60 @@ export default function UIOverlay(props) {
       <div style={{
         position: 'absolute',
         left: 0, right: 0, bottom: 0,
-        height: '40px',
+        height: '44px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 40px',
-        background: 'linear-gradient(0deg, rgba(5, 12, 26, 0.85) 0%, transparent 100%)',
+        padding: '0 48px',
+        background: 'linear-gradient(0deg, rgba(6, 16, 34, 0.92) 0%, transparent 100%)',
         pointerEvents: 'auto',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '22px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '26px' }}>
           {['Inter', 'Docs', 'Privacy', 'Terms'].map((f) => (
             <a key={f} href="#" style={{
               fontSize: '10.5px', fontWeight: 500,
-              color: f === 'Inter' ? 'rgba(200, 220, 240, 0.5)' : 'rgba(150, 175, 205, 0.45)',
-              textDecoration: 'none', letterSpacing: '0.4px',
+              color: 'rgba(160, 185, 215, 0.55)',
+              textDecoration: 'none', letterSpacing: '0.3px',
               transition: 'color 0.2s ease',
             }}
-              onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(200, 220, 240, 0.75)'}
-              onMouseLeave={(e) => e.currentTarget.style.color = f === 'Inter' ? 'rgba(200, 220, 240, 0.5)' : 'rgba(150, 175, 205, 0.45)'}
+              onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(200, 225, 250, 0.8)'}
+              onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(160, 185, 215, 0.55)'}
             >
               {f}
             </a>
           ))}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          {['⟲', '✕', '📷', '▶'].map((ic, i) => (
-            <a key={i} href="#" style={{
-              fontSize: '14px', color: 'rgba(150, 175, 205, 0.45)', textDecoration: 'none',
-              transition: 'color 0.2s ease',
-            }}
-              onMouseEnter={(e) => e.currentTarget.style.color = '#00e5ff'}
-              onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(150, 175, 205, 0.45)'}
-            >{ic}</a>
-          ))}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <a href="#" style={{
+            fontSize: '15px', color: 'rgba(160, 185, 215, 0.5)', textDecoration: 'none',
+            transition: 'color 0.2s ease',
+          }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#00e5ff'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(160, 185, 215, 0.5)'}
+          >↻</a>
+          <a href="#" style={{
+            fontSize: '15px', color: 'rgba(160, 185, 215, 0.5)', textDecoration: 'none',
+            transition: 'color 0.2s ease',
+          }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#00e5ff'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(160, 185, 215, 0.5)'}
+          >✕</a>
+          <a href="#" style={{
+            fontSize: '15px', color: 'rgba(160, 185, 215, 0.5)', textDecoration: 'none',
+            transition: 'color 0.2s ease',
+          }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#00e5ff'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(160, 185, 215, 0.5)'}
+          >◉</a>
+          <a href="#" style={{
+            fontSize: '15px', color: 'rgba(160, 185, 215, 0.5)', textDecoration: 'none',
+            transition: 'color 0.2s ease',
+          }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#00e5ff'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(160, 185, 215, 0.5)'}
+          >▶</a>
         </div>
         <div style={{
-          fontSize: '10px', color: 'rgba(130, 155, 185, 0.45)',
-          letterSpacing: '0.6px', fontWeight: 500,
+          fontSize: '10px', color: 'rgba(140, 165, 195, 0.5)',
+          letterSpacing: '0.5px', fontWeight: 500,
         }}>
           © Copyright 2022 — AVATari.io
         </div>
@@ -606,31 +662,33 @@ function FeatureCard({ title, subtitle, children }) {
   return (
     <div style={{
       flex: 1,
-      padding: '18px 20px',
+      padding: '18px 22px',
       borderRadius: '10px',
-      background: 'linear-gradient(145deg, rgba(12, 22, 42, 0.85), rgba(8, 16, 32, 0.9))',
-      border: '1px solid rgba(0, 229, 255, 0.1)',
-      backdropFilter: 'blur(12px)',
-      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.35)',
+      background: 'linear-gradient(145deg, rgba(10, 22, 44, 0.82), rgba(6, 14, 30, 0.88))',
+      border: '1px solid rgba(0, 180, 230, 0.12)',
+      backdropFilter: 'blur(14px)',
+      boxShadow: '0 8px 36px rgba(0, 0, 0, 0.4)',
       transition: 'all 0.3s ease',
       cursor: 'default',
     }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-3px)';
-        e.currentTarget.style.boxShadow = '0 14px 48px rgba(0, 0, 0, 0.45)';
+        e.currentTarget.style.boxShadow = '0 14px 52px rgba(0, 0, 0, 0.5)';
+        e.currentTarget.style.borderColor = 'rgba(0, 229, 255, 0.22)';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.35)';
+        e.currentTarget.style.boxShadow = '0 8px 36px rgba(0, 0, 0, 0.4)';
+        e.currentTarget.style.borderColor = 'rgba(0, 180, 230, 0.12)';
       }}
     >
       <h4 style={{
-        margin: '0 0 6px', fontSize: '12.5px', fontWeight: 800, letterSpacing: '0.6px',
-        color: '#e8f4ff', lineHeight: 1.3,
+        margin: '0 0 6px', fontSize: '12.5px', fontWeight: 800, letterSpacing: '0.5px',
+        color: '#eaf5ff', lineHeight: 1.3,
       }}>{title}</h4>
       <p style={{
-        margin: '0 0 14px', fontSize: '10.5px',
-        color: 'rgba(160, 185, 215, 0.65)',
+        margin: '0 0 16px', fontSize: '10.5px',
+        color: 'rgba(155, 185, 215, 0.7)',
         lineHeight: 1.4, letterSpacing: '0.2px',
       }}>{subtitle}</p>
       <div style={{ minHeight: '28px', display: 'flex', alignItems: 'center' }}>
@@ -643,14 +701,14 @@ function FeatureCard({ title, subtitle, children }) {
 function Tag({ color, children }) {
   return (
     <div style={{
-      padding: '6px 10px',
+      padding: '6px 11px',
       borderRadius: '5px',
-      background: `${color}15`,
-      border: `1px solid ${color}44`,
+      background: `${color}14`,
+      border: `1px solid ${color}40`,
       fontSize: '10px',
-      fontWeight: 600,
+      fontWeight: 700,
       color: color,
-      letterSpacing: '0.3px',
+      letterSpacing: '0.2px',
       lineHeight: 1.2,
     }}>
       {children}

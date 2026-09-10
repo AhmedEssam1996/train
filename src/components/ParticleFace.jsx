@@ -3,7 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { vertexShader, fragmentShader } from './shaders/faceShaders';
 
-const PARTICLE_COUNT = 26000;
+const PARTICLE_COUNT = 25000;
 
 function seededRandom(seed) {
   const x = Math.sin(seed) * 10000;

@@ -13,24 +13,26 @@ import { voiceActivityDetectionService as vadService } from './services/speech/V
 import { bilingualSpeechService } from './services/speech/BilingualSpeechService';
 import { audioLipSyncService } from './services/lip-sync/AudioLipSyncService';
 import { openRouterService } from './services/ai/OpenRouterService';
+import { weatherService } from './services/weather/WeatherService';
+import { musicPlayerService } from './services/music/MusicPlayerService';
 
 function Scene({ state, audioAmp, glowIntensity }) {
   return (
     <>
-      <ambientLight intensity={0.25} />
-      <pointLight position={[5, 5, 5]} intensity={0.6} color="#00e5ff" />
-      <pointLight position={[-5, 3, 2]} intensity={0.35} color="#40c4ff" />
-      <pointLight position={[0, -3, -3]} intensity={0.2} color="#00b8d4" />
+      <ambientLight intensity={0.3} />
+      <pointLight position={[5, 5, 5]} intensity={0.7} color="#00e5ff" />
+      <pointLight position={[-5, 3, 2]} intensity={0.4} color="#26c6da" />
+      <pointLight position={[0, -3, -3]} intensity={0.25} color="#00bcd4" />
 
       <Grid
         args={[30, 30]}
         position={[0, -2, 0]}
         cellSize={0.5}
         cellThickness={0.5}
-        cellColor="rgba(0, 180, 255, 0.08)"
+        cellColor="rgba(0, 200, 230, 0.06)"
         sectionSize={3}
         sectionThickness={1}
-        sectionColor="rgba(0, 200, 255, 0.12)"
+        sectionColor="rgba(0, 220, 240, 0.09)"
         fadeDistance={25}
         fadeStrength={1.5}
         followCamera={false}
@@ -86,16 +88,38 @@ export default function App() {
   const fpsFramesRef = useRef(0);
   const fpsLastTimeRef = useRef(performance.now());
   const fpsIntervalRef = useRef(null);
+  const userMusicPlayingRef = useRef(false);
+
+  const applyAudioDucking = useCallback(() => {
+    const st = appStateRef.current;
+    if (userMusicPlayingRef.current) {
+      ambientMusicService.duck();
+      if (typeof ambientMusicService.setDuckLevel === 'function') {
+        ambientMusicService.setDuckLevel(0.05);
+      }
+      if (st === 'SPEAKING' && typeof musicPlayerService.setVolume === 'function') {
+        const base = musicPlayerService._baseVolume ?? 0.7;
+        musicPlayerService.setVolume(Math.max(0.18, base * 0.45));
+      } else if (typeof musicPlayerService.setVolume === 'function') {
+        const stored = musicPlayerService._baseVolume ?? 0.7;
+        musicPlayerService.setVolume(stored);
+      }
+    } else {
+      if (typeof ambientMusicService.setDuckLevel === 'function') {
+        ambientMusicService.setDuckLevel(0.25);
+      }
+      if (st === 'LISTENING' || st === 'SPEAKING') {
+        ambientMusicService.duck();
+      } else {
+        ambientMusicService.unduck();
+      }
+    }
+  }, []);
 
   const setState = useCallback((newState) => {
     appStateRef.current = newState;
     setAppState(newState);
-
-    if (newState === 'LISTENING' || newState === 'SPEAKING') {
-      ambientMusicService.duck();
-    } else {
-      ambientMusicService.unduck();
-    }
+    applyAudioDucking();
 
     switch (newState) {
       case 'LISTENING':
@@ -110,7 +134,7 @@ export default function App() {
       default:
         setGlowIntensity(0.15);
     }
-  }, []);
+  }, [applyAudioDucking]);
 
   const addChatMessage = useCallback((role, content, language) => {
     setChatMessages(prev => [
@@ -119,25 +143,148 @@ export default function App() {
     ]);
   }, []);
 
+  const handleMusicControlConfirm = useCallback((action, isAr) => {
+    const actionMapAr = {
+      pause: 'تم إيقاف الموسيقى مؤقتاً.',
+      resume: 'تم استئناف الموسيقى.',
+      stop: 'تم إيقاف الموسيقى تماماً.',
+      next: 'تم تشغيل الأغنية التالية.',
+      prev: 'تم تشغيل الأغنية السابقة.',
+    };
+    const actionMapEn = {
+      pause: 'Music paused.',
+      resume: 'Music resumed.',
+      stop: 'Music stopped completely.',
+      next: 'Playing next song.',
+      prev: 'Playing previous song.',
+    };
+    return isAr ? (actionMapAr[action] || 'تم التحكم في الموسيقى.') : (actionMapEn[action] || 'Music control executed.');
+  }, []);
+
+  const executeToolCalls = useCallback(async (toolCalls, detectedLang) => {
+    const isAr = detectedLang === 'ar';
+    const results = [];
+    for (const tool of toolCalls) {
+      try {
+        const name = tool.name;
+        const params = tool.parameters || {};
+        if (name === 'get_weather') {
+          const weatherData = await weatherService.getCurrentWeather(params.city || (isAr ? 'القاهرة' : 'Cairo'), detectedLang);
+          const report = weatherService.formatWeatherReport(weatherData, detectedLang);
+          results.push({ tool: name, result: report });
+        } else if (name === 'play_music') {
+          if (params.action && params.action !== 'play') {
+            if (params.action === 'pause') musicPlayerService.pause();
+            else if (params.action === 'resume') musicPlayerService.resume();
+            else if (params.action === 'stop') { musicPlayerService.stop(); userMusicPlayingRef.current = false; }
+            else if (params.action === 'next') await musicPlayerService.next();
+            else if (params.action === 'prev') await musicPlayerService.previous();
+            results.push({ tool: name, result: handleMusicControlConfirm(params.action, isAr) });
+          } else {
+            const song = await musicPlayerService.playSong(params.query || null);
+            userMusicPlayingRef.current = true;
+            musicPlayerService._baseVolume = musicPlayerService.getVolume ? musicPlayerService.getVolume() : 0.7;
+            applyAudioDucking();
+            results.push({ tool: name, result: musicPlayerService.formatSongInfo(song, detectedLang) });
+          }
+        } else if (name === 'control_music') {
+          const a = params.action;
+          if (a === 'pause') musicPlayerService.pause();
+          else if (a === 'resume') musicPlayerService.resume();
+          else if (a === 'stop') { musicPlayerService.stop(); userMusicPlayingRef.current = false; }
+          else if (a === 'next') await musicPlayerService.next();
+          else if (a === 'prev') await musicPlayerService.previous();
+          results.push({ tool: name, result: handleMusicControlConfirm(a, isAr) });
+        }
+      } catch (e) {
+        console.warn('Tool exec error:', tool.name, e);
+      }
+    }
+    return results;
+  }, [applyAudioDucking, handleMusicControlConfirm]);
+
   const generateAIResponse = useCallback(async (userText, language) => {
     const detectedLang = openRouterService.detectLanguage(userText);
     const useLanguage = language.startsWith('ar') || detectedLang === 'ar' ? 'ar-EG' : 'en-US';
+    const isAr = useLanguage.startsWith('ar');
 
     addChatMessage('user', userText, useLanguage);
-
     setState('THINKING');
+
+    const localIntent = openRouterService.detectIntentLocally(userText, detectedLang);
+
+    if (localIntent.intent === 'weather') {
+      try {
+        const weatherData = await weatherService.getCurrentWeather(localIntent.city, isAr ? 'ar' : 'en');
+        const report = weatherService.formatWeatherReport(weatherData, isAr ? 'ar' : 'en');
+        addChatMessage('assistant', report, useLanguage);
+        return report;
+      } catch (e) {
+        console.error('Weather error:', e);
+        const fb = openRouterService.getFallbackResponse(userText, detectedLang);
+        addChatMessage('assistant', fb, useLanguage);
+        return fb;
+      }
+    }
+
+    if (localIntent.intent === 'play_music') {
+      try {
+        const song = await musicPlayerService.playSong(localIntent.query || null);
+        userMusicPlayingRef.current = true;
+        musicPlayerService._baseVolume = 0.7;
+        applyAudioDucking();
+        const spoken = musicPlayerService.formatSongInfo(song, isAr ? 'ar' : 'en');
+        addChatMessage('assistant', spoken, useLanguage);
+        return spoken;
+      } catch (e) {
+        console.error('Music play error:', e);
+        const fb = openRouterService.getFallbackResponse(userText, detectedLang);
+        addChatMessage('assistant', fb, useLanguage);
+        return fb;
+      }
+    }
+
+    if (localIntent.intent === 'control_music') {
+      try {
+        const a = localIntent.action;
+        if (a === 'pause') musicPlayerService.pause();
+        else if (a === 'resume') musicPlayerService.resume();
+        else if (a === 'stop') { musicPlayerService.stop(); userMusicPlayingRef.current = false; applyAudioDucking(); }
+        else if (a === 'next') await musicPlayerService.next();
+        else if (a === 'prev') await musicPlayerService.previous();
+        const confirm = handleMusicControlConfirm(a, isAr);
+        addChatMessage('assistant', confirm, useLanguage);
+        return confirm;
+      } catch (e) {
+        console.error('Music control error:', e);
+        const fb = openRouterService.getFallbackResponse(userText, detectedLang);
+        addChatMessage('assistant', fb, useLanguage);
+        return fb;
+      }
+    }
 
     try {
       const response = await openRouterService.chat(userText, { language: detectedLang });
-      addChatMessage('assistant', response, detectedLang === 'ar' ? 'ar-EG' : 'en-US');
-      return response;
+      const toolCalls = openRouterService.parseToolCallsFromText(response);
+      let finalText = openRouterService.stripToolCalls(response);
+
+      if (toolCalls.length > 0) {
+        const toolResults = await executeToolCalls(toolCalls, detectedLang);
+        if (toolResults.length > 0) {
+          const primaryResult = toolResults[0].result;
+          if (primaryResult) finalText = primaryResult;
+        }
+      }
+
+      addChatMessage('assistant', finalText, useLanguage);
+      return finalText;
     } catch (err) {
       console.error('AI Response error:', err);
       const fallback = openRouterService.getFallbackResponse(userText, detectedLang);
-      addChatMessage('assistant', fallback, detectedLang === 'ar' ? 'ar-EG' : 'en-US');
+      addChatMessage('assistant', fallback, useLanguage);
       return fallback;
     }
-  }, [setState, addChatMessage]);
+  }, [setState, addChatMessage, applyAudioDucking, executeToolCalls, handleMusicControlConfirm]);
 
   const handleSpeakResponse = useCallback((responseText, language) => {
     setState('SPEAKING');
@@ -223,6 +370,24 @@ export default function App() {
       await ambientMusicService.init();
       ambientMusicService.start();
       setMusicEnabled(ambientMusicService.getMusicEnabled());
+
+      await musicPlayerService.init(
+        ambientMusicService.getAudioContext ? ambientMusicService.getAudioContext() : null,
+        ambientMusicService.getMasterGain ? ambientMusicService.getMasterGain() : null
+      );
+      musicPlayerService.onSongEnd = () => {
+        userMusicPlayingRef.current = false;
+        applyAudioDucking();
+      };
+      musicPlayerService.onPlayStateChange = (st) => {
+        if (st?.playing === false) {
+          userMusicPlayingRef.current = false;
+        } else if (st?.playing === true) {
+          userMusicPlayingRef.current = true;
+        }
+        applyAudioDucking();
+      };
+      musicPlayerService._baseVolume = 0.7;
 
       if (micInputEnabled) {
         try {
@@ -387,6 +552,7 @@ export default function App() {
       audioLipSyncService.disconnect();
       bilingualSpeechService.stopSpeaking();
       bilingualSpeechService.stopRecognition();
+      try { musicPlayerService.stop(); } catch (e) {}
       ambientMusicService.stop();
     };
   }, []);
@@ -406,12 +572,12 @@ export default function App() {
       width: '100vw',
       height: '100vh',
       overflow: 'hidden',
-      background: `radial-gradient(ellipse at 50% 35%, 
-        ${appState === 'LISTENING' ? '#072029' : 
-          appState === 'THINKING' ? '#120a24' :
-          appState === 'SPEAKING' ? '#1e1808' : '#06101c'} 0%, 
-        #050a15 55%, 
-        #02050a 100%)`,
+      background: `radial-gradient(ellipse at 50% 40%, 
+        ${appState === 'LISTENING' ? '#07252f' : 
+          appState === 'THINKING' ? '#0c1a2e' :
+          appState === 'SPEAKING' ? '#0c1e2a' : '#061522'} 0%, 
+        #040e18 55%, 
+        #02070d 100%)`,
       transition: 'background 1.4s cubic-bezier(0.4, 0, 0.2, 1)',
       fontFamily: '"Inter", "Segoe UI", "Helvetica Neue", -apple-system, Arial, sans-serif',
     }}>
@@ -419,9 +585,9 @@ export default function App() {
         position: 'absolute',
         inset: 0,
         background: `
-          radial-gradient(circle at 18% 82%, rgba(0, 229, 255, 0.07) 0%, transparent 48%),
-          radial-gradient(circle at 82% 18%, rgba(64, 156, 255, 0.06) 0%, transparent 48%),
-          radial-gradient(circle at 50% 50%, rgba(0, 200, 255, 0.035) 0%, transparent 65%)
+          radial-gradient(circle at 20% 80%, rgba(0, 229, 255, 0.08) 0%, transparent 50%),
+          radial-gradient(circle at 80% 20%, rgba(0, 188, 212, 0.07) 0%, transparent 50%),
+          radial-gradient(circle at 50% 55%, rgba(0, 220, 240, 0.04) 0%, transparent 70%)
         `,
         pointerEvents: 'none',
       }} />
@@ -433,7 +599,7 @@ export default function App() {
           alpha: true,
           powerPreference: 'high-performance',
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.3,
+          toneMappingExposure: 1.25,
         }}
         style={{
           position: 'absolute',
@@ -442,7 +608,7 @@ export default function App() {
           height: '100%',
         }}
       >
-        <fog attach="fog" args={['#02050a', 6, 18]} />
+        <fog attach="fog" args={['#02070d', 6, 18]} />
         <Scene
           state={appState}
           audioAmp={audioAmp}

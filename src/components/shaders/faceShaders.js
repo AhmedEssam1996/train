@@ -173,12 +173,12 @@ export const vertexShader = /* glsl */ `
     
     gl_PointSize = vSize * (300.0 / -mvPosition.z);
     
-    vec3 idleColor = hsv2rgb(vec3(0.51, 0.78, 0.98));
-    vec3 listenColor = hsv2rgb(vec3(0.49, 0.88, 1.0));
-    vec3 thinkingColor = hsv2rgb(vec3(0.53, 0.78, 1.0));
-    vec3 speakingColor = hsv2rgb(vec3(0.47, 0.88, 1.0));
-    vec3 irisColor = hsv2rgb(vec3(0.50, 1.0, 1.0));
-    vec3 lipColor = hsv2rgb(vec3(0.52, 0.72, 1.0));
+    vec3 idleColor = hsv2rgb(vec3(0.515, 0.92, 1.0));
+    vec3 listenColor = hsv2rgb(vec3(0.505, 1.0, 1.0));
+    vec3 thinkingColor = hsv2rgb(vec3(0.52, 0.90, 1.0));
+    vec3 speakingColor = hsv2rgb(vec3(0.51, 0.95, 1.0));
+    vec3 irisColor = hsv2rgb(vec3(0.505, 1.0, 1.0));
+    vec3 lipColor = hsv2rgb(vec3(0.515, 0.88, 1.0));
     
     vec3 stateColor;
     if (uState == STATE_IDLE) stateColor = idleColor;
@@ -196,18 +196,18 @@ export const vertexShader = /* glsl */ `
       vColor = mix(lipColor, stateColor, 0.5);
       vGlow = uState == STATE_SPEAKING ? 2.2 : 1.1;
     } else {
-      float colorMix = 0.18 + uGlowIntensity * 0.55;
-      float seedTint = (aRandomSeed - 0.5) * 0.05;
+      float colorMix = 0.22 + uGlowIntensity * 0.55;
+      float seedTint = (aRandomSeed - 0.5) * 0.025;
       vColor = mix(
-        hsv2rgb(vec3(0.51 + seedTint, 0.65 + aRandomSeed * 0.18, 0.85 + aRandomSeed * 0.12)),
+        hsv2rgb(vec3(0.512 + seedTint, 0.82 + aRandomSeed * 0.12, 0.92 + aRandomSeed * 0.08)),
         stateColor,
         colorMix
       );
-      vGlow = 0.7 + uGlowIntensity * 1.5;
+      vGlow = 0.75 + uGlowIntensity * 1.5;
     }
     
     if (uState == STATE_THINKING) {
-      vColor = mix(vColor, hsv2rgb(vec3(0.52 + sin(uTime + aRandomSeed * 10.0) * 0.06, 0.82, 1.0)), 0.55);
+      vColor = mix(vColor, hsv2rgb(vec3(0.515 + sin(uTime + aRandomSeed * 10.0) * 0.03, 0.90, 1.0)), 0.55);
       vGlow = 1.5;
     }
     
