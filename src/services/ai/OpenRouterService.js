@@ -428,13 +428,11 @@ If you are unsure what the user wants, just ask a clarifying question without ca
         : 'You\'re so very welcome! I\'m always here to answer and help. Don\'t hesitate with anything else you need!';
     }
     if (matches(keywords.bye)) {
-      return isArabic
-        : 'وداعاً يا صديقي! كان من دواعي سروري التحدث معك. أتمنى لك يوماً سعيداً ومليئاً بالنجاح، ونراك قريباً إن شاء الله! 🎵'
-        : 'Goodbye, my friend! It was truly lovely chatting with you. Wishing you a wonderful, successful day — see you again soon! 🎵';
+      return isArabic ? 'وداعا يا صديقي! كان من دواعي سروري التحدث معك. اتمنى لك يوما سعيدا ومليئا بالنجاح، ونراك قريبا ان شاء الله! 🎵' : 'Goodbye, my friend! It was truly lovely chatting with you. Wishing you a wonderful, successful day - see you again soon! 🎵';
     }
     if (matches(keywords.help)) {
       return isArabic
-        : 'أنا هنا لمساعدتك في كل شيء! يمكنك: (١) تسألني عن أي موضوع، (٢) تسألني عن الطقس في أي مدينة مثل "ما هو الطقس في القاهرة؟"، (٣) تطلب مني تشغيل أغنية مثل "شغلي اغنية عربية". فقط ابدأ التحدث وسأستجيب لك فوراً!'
+        ? 'أنا هنا لمساعدتك في كل شيء! يمكنك: (١) تسألني عن أي موضوع، (٢) تسألني عن الطقس في أي مدينة مثل "ما هو الطقس في القاهرة؟"، (٣) تطلب مني تشغيل أغنية مثل "شغلي اغنية عربية". فقط ابدأ التحدث وسأستجيب لك فوراً!'
         : 'I\'m here to help with everything! You can: (1) Ask me about any topic, (2) Ask for the weather in any city like "weather in London", (3) Request songs like "play jazz music". Just start speaking and I\'ll respond instantly!';
     }
     if (matches(keywords.time)) {
